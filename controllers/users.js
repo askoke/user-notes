@@ -38,5 +38,28 @@ const register = async (req, res) => {
     })
 }   
 
+const login = async (req, res) => {
+    const password = req.body.password
+    const emails = await User.findAll({ where: { email: req.body.email }})
+    if (emails.length > 0) {
+        bcrypt.compare(password, emails[0].password, (err, result) => {
+            if(result){
+                req.session.user = {
+                    username: User.username,
+                    user_id: User.id
+                }
+                res.json({
+                    message: 'User is logged in',
+                    user: User,
+                    user_session: req.session.user
+                })
+            } else {
+                res.json({message: 'Password is incorrect'})
+            }
+        })
+    } else {
+        res.json({message: 'Email does not exsist!'})
+    }
+}
 
-module.exports = {register} 
+module.exports = {register, login} 
